@@ -1,0 +1,195 @@
+#LIST OF PARAMETERS FOR SPLATCHE3 
+
+########
+#PARAMETERS LINKED TO FILENAMES/PHYSICAL SPACE
+########
+
+PresVegetationFile=./datasets_2layers-ver3/lowest_res_converted.asc
+	#Ascii raster file describing the world and the oceans
+
+HydroFile=./datasets_2layers-ver3/lowest_river_converted.asc
+	#says it's not mandatory, but is. 
+
+RoughnessTopoFile=./datasets_2layers-ver3/lowest_rough_converted.asc
+	#mandatory.
+
+mMapFile=./datasets_2layers-ver3/lowest_res_converted.asc
+	#says it's not mandatory, but is. 
+
+Veg2KFile=./datasets_2layers-ver3/dynamic_K.txt
+	#carrying capacity values
+
+Veg2FFile=./datasets_2layers-ver3/dynamic_F.txt
+	#friction values of the veg-says not mandatory but is. 
+
+Veg2mFile=./datasets_2layers-ver3/dynamic_m.txt
+	#says not mandatory but is. Migration values. 
+
+#######
+#PARAMETERS LINKED TO DEMOGRAPHIC SIMULATIONS
+#######
+
+PopDensityFile=./datasets_2layers-ver3/dens_init.txt
+	#initial densities of populations+locations. Text file. 
+	#sim_dens is the one is necessary, but am trying with dens_init first
+
+ChosenDemographicModel=11
+	#identifies the demo model. this has been causing trouble. 
+
+EndTime=5000
+	#number of generations. 
+
+GenerationTime=30
+	#time of generations in years. 
+
+AllowSourcePopulationOverflow=0
+	#allows initial pop size (if above carcap) to spread around neighbouring demes
+
+TauValue=250
+	#in generations. time between onset of expansion and when all remaining lineages are
+	#brought into one deme. 
+
+ArrivalCellFile=./datasets_1layer-ver3/sim_Arrival_cell.col
+	#.col file of deme coords for arrival times (?) 
+	#arrival time (known time?) where pops are
+
+######
+#PARAMETERS LINKED TO PHYSICAL ENVIRONMENT
+######
+
+FrictionChoice=0
+	#defines what causes friction in moving across landscape.
+	#only need it set to 0, which = vegetationn
+	#says not mandatory but is. 
+	#must be defined in Veg2File or RoughnessTopoFile.
+
+RealBPTime=-390000
+	#Realtime start of sim in years BP. must be negative
+	#linked to display and Vostok time series.
+
+RiverFrictionChangeFactor=0.7
+	#decreases of increases friction of river cells. says not mandatory but is.
+
+RiverCarCapChangeFactor=2
+	#carrying cap of rivers. there are no rivers in hydrofile, so it doesn't matter too much
+
+CoastFrictionChangeFactor=0.7
+	#friction of coast cells. the friction of these cells is simply multiplied by this
+	#factor
+
+CoastCarCapChangeFactor=2
+	#carcap of coast. says not mandatory but is. 
+
+######
+#PARAMETERS LINKED TO GENETIC SIMULATION
+######
+
+SampleFile=./datasets_2layers-ver3/sim_GeneSamples.sam 
+	#contains coords, size, and time (in gen) of the pops appearance from start of sim
+	#.sam extension.
+	#the number of samples must match with the number of priors in abc.R
+
+GeneticFile=./datasets_2layers-ver3/genetic_data_SEQ.par
+	#contains the freq of nucleobases, chro, recomb, mutation
+	#.par extension
+	#how many chr are produced later
+
+NumGeneticSimulations=2
+	#no. of gene sims per demo one
+
+GenotypicData=0
+	#choice of genot or haplot data. haplo is 0; more like real aDNA
+
+MaxNumGenerations=100000
+	#max num of total gens for simulation. corresponds to no of gen for dem sims, 
+	#and that for the coales process prior to time 0. 
+
+NexusFile=1
+	#Generation of Nexus files (0:no ; 1: yes)
+
+GenealogiesFile=0
+	#Generation of genealogy files (0:no ; 1: yes)
+
+ImmigDistrFile=1
+	#Generation of immigrants distribution file (0:no ; 1: yes) (MANDATORY)
+
+######
+#PARAMETERS LINKED TO TWO POPULATION SIMULATIONS.
+######
+
+DoublePopulationMode=1
+	#Flag for indicating that two pops are being used. 
+
+Veg2K_P2_File=./datasets_2layers-ver3/dynamic_K_P2.txt
+	#carcap of veg categories for P2. 
+
+Veg2F_P2_File=./datasets_2layers-ver3/dynamic_F_P2.txt
+	#friction values of veg category for P2
+	#says not mandatory. but is. 
+
+#Text file for population 2 (P2) holding the carying capacity values for each vegetation category (MANDATORY)
+Veg2m_P2_File=./datasets_2layers-ver3/dynamic_m.txt
+	#migration values for P2 for each veg category
+	#this is the same as P1. not changing or making more complex. 
+
+PropFile=1
+	#Generate proportion of 2nd layer (e.g. neolithic) genes file (0:no ; 1: yes)
+
+######
+#OTHER GENERATION OF OUTPUTS
+######
+
+GenerateOutputMigrationBMP=0
+	#Generate output BMP of migrations (0:no ; 1: yes)
+
+GenerateOutputMDensityBMP=0
+	#Generate output BMP of densities (0:no ; 1: yes)
+
+GenerateOutputOccupationBMP=0
+	#Generate output BMP of occupations (0:no ; 1: yes)
+
+GenerateOutputMigrationASCII=0
+	#Generate output ASCII of migrations (0:no ; 1: yes)
+
+GenerateOutputMDensityASCII=0
+	#Generate output ASCII of densities (0:no ; 1: yes)
+
+GenerateOutputOccupationASCII=0
+	#Generate output ASCII of occupations (0:no ; 1: yes)
+
+######
+#MISC PARAMETERS
+######
+
+AllowShortIntForNumberOfIndividuals=0
+	#Allow "short int" (instead of int) to be used for the database. This reduce by half
+	#the amount of RAM necessary. Only do that if you are sure that your number of
+	#individuals
+	#(i.e. population densities and number of migrants) never exceeds 16'000
+
+
+######
+#PARAMETERS THAT SHIFT
+######
+
+AncestralSize=250
+	#controls the size of the ancestral pop between the two pops
+
+#Growth rate used in the logistic function (MANDATORY)
+GrowthRate=0.013
+
+#Growth rate for P2 used in the logistic function (MANDATORY)
+GrowthRate_P2=0.010
+
+#Migration rate for neighboring deme migration (MANDATORY)
+MigrationRate=0.45
+
+#Migration rate for P2 for neighboring deme migration (MANDATORY)
+MigrationRate_P2=0.23
+
+#Interdeme migration rate from P1 tp P2 [0-1] (MANDATORY)
+MigrRate_P1_to_P2=0.33
+
+#Interdeme migration rate from P2 tp P1 [0-1] (MANDATORY)
+MigrRate_P2_to_P1=0.45
+
