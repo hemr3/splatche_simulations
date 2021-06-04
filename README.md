@@ -14,7 +14,7 @@ Examples of code that work on the IdeaCentre terminal:
 
 python3 arpToVCF.py template_input_GeneSamples_2.arp template_input_GeneSamples_2.arp.vcf
 
-python3 sfs_on_vcf_dadi_wrapper.py --in_vcf template_input_GeneSamples_2.arp.vcf --in_popfile popfile_arp_vcf.txt --out_sfs jsfs_test3.txt --populations denis vindi chagy mezma --projections 2 2 2 2 –proportions_out
+python3 sfs_on_vcf_dadi_wrapper.py --in_vcf template_input_GeneSamples_2.arp.vcf --in_popfile popfile_arp_vcf.txt --out_sfs jsfs_test3.txt --populations denisovan altai vindija chagyrskaya mezmaiskaya --projections 2 2 2 2 –proportions_out
 
 Where the pop_file.txt = a space-delimited list of the names of populations produced by the arlesumstats VCF files, and then names I want them known by:
 
