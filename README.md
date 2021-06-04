@@ -19,8 +19,13 @@ python3 sfs_on_vcf_dadi_wrapper.py --in_vcf template_input_GeneSamples_2.arp.vcf
 Where the pop_file.txt = a space-delimited list of the names of populations produced by the arlesumstats VCF files, and then names I want them known by:
 
 1 denisovan
+
 2 altai
+
 3 vindija
+
 4 denisovan
+
 5 chagyrskaya
+
 6 mezmaiskaya
