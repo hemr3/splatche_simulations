@@ -13,19 +13,22 @@ PresVegetationFile=./datasets_2layers-ver3/ppveg.asc
 HydroFile=./datasets_2layers-ver3/rivers.asc
 
 #Ascii file with the roughness values (MANDATORY only if FrictionChoice=1 or =2)
-RoughnessTopoFile=./datasets_2layers-ver3/roughness.asc
+##GSJ edit: Doesn't appear to be needed, so dropping this for neatness.
+#RoughnessTopoFile=./datasets_2layers-ver3/roughness.asc
 
 #Ascii file with the m_map ID values, to assign direction specific migration rates (NOT MANDATORY)
-mMapFile=./datasets_2layers-ver3/ppveg.asc
+##GSJ edit: We don't use direction-specific migration so dropping this.
+#mMapFile=./datasets_2layers-ver3/ppveg.asc
 
 #Text file holding the carying capacity values for each vegetation category (MANDATORY)
 Veg2KFile=./datasets_2layers-ver3/dynamic_K.txt
 
 #Text file holding the friction values for each vegetation category (NOT MANDATORY)
-Veg2FFile=./datasets_2layers-ver3/dynamic_F.txt
+#Veg2FFile=./datasets_2layers-ver3/dynamic_F.txt
 
 #Text file holding links to file(s) with the m values for each mMap category (NOT MANDATORY)
-Veg2mFile=./datasets_2layers-ver3/dynamic_m.txt
+##GSJ edit: Doesn't appear to be needed, so dropping this for neatness. Actually, could be dangerous as it may overwrite the MigrationRate based on manual.
+#Veg2mFile=./datasets_2layers-ver3/dynamic_m.txt
 
 ##################################################################
 #Parameters linked to demographic simulations
@@ -38,10 +41,11 @@ PopDensityFile=./datasets_2layers-ver3/dens_init.txt
 ChosenDemographicModel=11
 
 #Number of generations (MANDATORY)
-EndTime=5000
+###GSJ edit: End time is 15090 (N/D split) - 1793 (Vind sampling time) + 1
+EndTime=13298
 
 #Generation time, used in several functions needing this (MANDATORY)
-GenerationTime=30
+GenerationTime=29
 
 #Growth rate used in the logistic function (MANDATORY)
 
@@ -62,7 +66,8 @@ AllowSourcePopulationOverflow=0
 
 #Tau value (in generations). bacward in time, this is the time between the onset of the expansion
 #and the timing at which all remainaing lineages are brought into one small deme  (NOT MANDATORY)
-TauValue=250
+###GSJ edit: I include a 1000-generation burn in process at the start of the simulation so have changed this accordingly. Based on 20225 (common ancestor) - 15090 (Nean/Deni split)
+TauValue=5135
 
 #Text file (*.col) where are found the deme coordinates for which arrival times are needed (MANDATORY)
 ArrivalCellFile=./datasets_1layer-ver3/Arrival_cell.col
@@ -75,32 +80,37 @@ ArrivalCellFile=./datasets_1layer-ver3/Arrival_cell.col
 #If friction needs to be taken into account, this parameter must be defined
 #(along with "Veg2FFile" and/or "RoughnessTopoFile").
 #If not defined, friction is uniform   (NOT MANDATORY)
-FrictionChoice=0
+###GSJ edit: We don't use friction so I'm dropping this.
+#FrictionChoice=0
 
 #Real time (in years BP) for the start of the simulation. It must be negative!
 #This parameter is linked to the graphical display of the real time in any simulation,
 #but is also linked to the Vostok time series in a dynamic simulation (MANDATORY)
-RealBPTime=-390000
+###GSJ edit: Time is ((15090 gens Nean/Deni split) * 29 gentime) - 52000 Vindija sampling time
+RealBPTime=-385610
 
 #River Friction change factor [>0]. This is a factor that increases or decreases the frition
 #of the river cells (as defined in the HydroFile input file). The friction of these cells
 #is simply multiplied by this factor.  (NOT MANDATORY)
-RiverFrictionChangeFactor=0.7
+###GSJ edit: We don't use friction so dropping this.
+#RiverFrictionChangeFactor=1
 
 #River Carrying capacity change factor [>0]. This is a factor that increases or decreases the
 #carrying capacity of the river cells (as defined in the HydroFile input file). The carrying capacity of these cells
 #is simply multiplied by this factor. (NOT MANDATORY)
-RiverCarCapChangeFactor=2
+###GSJ note: We *do* use this, and we want to fit it...!
 
 #Coast Friction change factor [>0]. This is a factor that increases or decreases the frition
 #of the coast cells (coasts are automatically defined). The friction of these cells
 #is simply multiplied by this factor.  (NOT MANDATORY)
-CoastFrictionChangeFactor=0.7
+###GSJ edit: We don't want coasts doing anything, especially if the program decides what a coast is. Dropping this.
+#CoastFrictionChangeFactor=0.7
 
 #Coast Carrying capacity change factor [>0]. This is a factor that increases or decreases the
 #carrying capacity of the coast cells (acoasts are automatically defined). The carrying capacity of these cells
 #is simply multiplied by this factor. (NOT MANDATORY)
-CoastCarCapChangeFactor=2
+###GSJ edit: We don't want coasts doing anything, especially if the program decides what a coast is. Dropping this.
+#CoastCarCapChangeFactor=2
 
 
 ##################################################################
@@ -115,7 +125,8 @@ SampleFile=./datasets_2layers-ver3/GeneSamples.sam
 GeneticFile=./datasets_2layers-ver3/genetic_data_SEQ.par
 
 #Number of genetic simulations for each demographic one (MANDATORY)
-NumGeneticSimulations=2
+###GSJ edit: Set to 1. Did you mean to do 2 genetic simulations per demographic one? Ie. do you use both of the genetics outputs, or just one? If just one then we can do one genetic simulation per demographic (and do half the genetic work). We can discuss this otherwise.
+NumGeneticSimulations=1
 
 #Choice of genotypic or haplotypic data (1:genotypic; 0: haplotypic)(MANDATORY)
 GenotypicData=0
@@ -123,16 +134,20 @@ GenotypicData=0
 #Maximum number of total generations for a simulation. This number corresponds to
 #the number of generation for the demographic simulation + the extra generations
 #for the coalescence process prior to time 0 (MANDATORY)
-MaxNumGenerations=100000
+###GSJ edit: Increased this number. This was the cause of at least some of your core dumps. That was due to the coal simulations going back further in time than the MaxNumGenerations. I've added some 0s to avoid this.
+MaxNumGenerations=100000000
 
 #Generation of Nexus files (0:no ; 1: yes) (NOT MANDATORY)
-NexusFile=1
+##GSJ edit: Set to 0. Do you need this output? If not lets skip it and maybe save time.
+NexusFile=0
 
 #Generation of genealogy files (0:no ; 1: yes) (MANDATORY)
-GenealogiesFile=0
+##GSJ edit: Set to 0. Do you need this output? If not lets skip it and maybe save time.
+GenealogiesFile=1
 
 #Generation of immigrants distribution file (0:no ; 1: yes) (MANDATORY)
-ImmigDistrFile=1
+##GSJ edit: Set to 0. Do you need this output? Skipping this saves a lot of time!! :)
+ImmigDistrFile=0
 
 ##################################################################
 #Parameters linked to double layers
@@ -157,13 +172,16 @@ DoublePopulationMode=1
 Veg2K_P2_File=./datasets_2layers-ver3/dynamic_K_P2.txt
 
 #Text file holding the friction values for each vegetation category (NOT MANDATORY)
-Veg2F_P2_File=./datasets_2layers-ver3/dynamic_F_P2.txt
+##GSJ edit: We don't use friction so dropping this for simplicity.
+#Veg2F_P2_File=./datasets_2layers-ver3/dynamic_F_P2.txt
 
 #Text file for population 2 (P2) holding the carying capacity values for each vegetation category (MANDATORY)
-Veg2m_P2_File=./datasets_2layers-ver3/dynamic_m.txt
+###GSJ edit: This is incorrectly labelled. This is the dynamic migration rates and I don't think we need it. Dropping.
+#Veg2m_P2_File=./datasets_2layers-ver3/dynamic_m.txt
 
 #Generate proportion of 2nd layer (e.g. neolithic) genes file (0:no ; 1: yes)  (MANDATORY)
-PropFile=1
+##GSJ edit: Set to 0. Do you need this output? Probably not, set to 0.
+PropFile=0
 
 ##################################################################
 #Parameters linked to various other outputs
@@ -200,4 +218,15 @@ AllowShortIntForNumberOfIndividuals=0
 ##
 #changing params
 ##
-AncestralSize=250
+#haploid Malaspinas 2016 common ancestor size 32671
+
+#AncestralSize=10 #GSJ: for testing
+AncestralSize=32671 #Don't change
+
+MigrationRate=0.01
+MigrationRate_P2=0.01
+MigrRate_P1_to_P2=0.05
+MigrRate_P2_to_P1=0.05
+GrowthRate=0.5
+GrowthRate_P2=0.5
+RiverCarCapChangeFactor=1
