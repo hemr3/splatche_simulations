@@ -5,39 +5,52 @@ library(lsr) #cohen's d (one samp)
 library(coala) #for joint site freq spec
 library(tidyverse) #for plots
 library(patchwork) #for plots
+library(formattable) #for tables
 
-  #this is the last step before running the sim
+#this is the last step before running the sim
 #before this, make sure that mod.input.R file is correct
 #and that run_sim.sh looks right 
 
-sum_stat_obs = c(0.000018, 0.000017, 0.000016, 0.000018, 0.000016)# 0.000017)
-sum_stat_obs = c(0.000169, 0.000160, 0.000169, 0.000150, 0.000180)#, 0.000180 )
+#sum_stat_obs = c(0.000016, 0.000016, 0.000014, 0.000018) # add jsfs at the end
   #this sum_stat_obs is made with hets drawn from VCFs. 
-  #in order: Alt, Vind, Mez, Chag, D4, D8
+  #in order: Alt, Vind, Mez, Chag, D3, D8
   
-sum_stat_obs = sum_stat_obs * 1000 * 500
+sum_stat_obs = c(8, 8, 6, 9, 0.1220, 0.5138, 0.0441, 0.0004, 0.0072, 
+                 0.0154, 0.0001, 0.0025, 0.0512, 0.0006, 0.0071, 0.0128, 0.0003, 
+                 0.0033, 0.0102, 0.0001, 0.0166, 0.0002, 0.0025, 0.0083, 0.0001, 
+                 0.0088, 0.0531, 0.0010, 0.0212, 0.0096, 0.0003, 0.0033, 0.0045, 
+                 0.0000, 0.0078, 0.0003, 0.0023, 0.0043, 0.0002, 0.0023, 0.0052, 
+                 0.0000, 0.0033, 0.0258, 0.0007, 0.0088, 0.0046, 0.0001, 0.0025, 
+                 0.0056, 0.0001, 0.0033, 0.0025)
+
+#sum_stat_obs = c(8, 8, 6, 9)
+
+#sum_stat_obs = sum_stat_obs * 1000 * 500 #calc is what did to get the first four no above.
+  #tell multi to only do first 4 for hi cov, first 6 for low cov
   #this creates expectancies of the thing tested for
 
-prior = list(#c("unif",250,252), #AncSize
-             c("unif", 0,0.5), #MigrationRate P1
-             c("unif", 0,0.5), #MigrationRate P2
-             c("unif", 0,0.5), #Admix P1-P2
-             c("unif", 0,0.5), #Admix P2-P1
-             c("unif", 0,0.025), #GrowthRate P1
-             c("unif", 0,0.025)) #GrowthRate P2
+prior = list(c("unif",0.11,0.8), #RiverCarCapChangeFactor
+             c("unif", 0,0.005), #MigrationRate P1
+             c("unif", 0,0.005), #MigrationRate P2
+             c("unif", 0,0.02), #Admix P1-P2
+             c("unif", 0,0.02), #Admix P2-P1
+             c("unif", 0,0.54), #GrowthRate P1
+             c("unif", 0,0.54)) #GrowthRate P2
   #this creates the prior expectation for the sim to draw no.s from 
-  # currently has AncSize, MigraRate (for P1,P2)
-  #'unif' shows a uniform dist, and 0,500 gives the limits
+  #'unif' shows a uniform dist, and 0,10000 gives the limits
 
-abc_sim = ABC_rejection(
+
+abc_sim8 = ABC_rejection(
   model = binary_model('/home/guy/splatche3/template/run_sim4.sh'),
   prior = prior,
-  nb_simul = 5,
+  nb_simul = 100000,
   summary_stat_target = sum_stat_obs,
   tol = 1.0 #could save all and do rej later
-#  verbose = T
-  )
-      #above performs abc sim-but remember that tol needs to be somewhat high, and nb above 1
+#  n_cluster = 6,
+#  use_seed = T
+# verbose = T
+)
+                          #above performs abc sim-but remember that tol needs to be somewhat high, and nb above 1
 
 par(mfrow=c(2,2))
 hist(abc_sim$param[,1], main = 'AncSize')
@@ -46,18 +59,18 @@ hist(abc_sim$param[,3], main = 'MigRate P2')
   #this shows (i think) which params were selected for the sims
   #acc - i think these are the accepted sims
 
-params = subset(abc_sim$param)
+params = subset(abc_sim6$param)
 param1 = params[,1] #Anc pop size
 param2 = params[,2] #MigRate P1
 param3 = params[,3] #MigRate P2
   #this splits the abc_sim$param into the three diff ones sim-ed
 
 rej = abc(target = sum_stat_obs, 
-          abc_sim$param, 
-          abc_sim$stats, 
-          tol = 0.05, #could do rej right now
+          abc_sim8$param, 
+          abc_sim8$stats, 
+          tol = 0.005, #could do rej right now
           method = "rejection")
-    #methods that can be used: rejection, loclinear and neuralnet (produces plots)
+  #methods that can be used: rejection, loclinear and neuralnet (produces plots)
   #rejection method produces which are best 
   #this is estimate of the posterior
 
@@ -65,7 +78,7 @@ rej #just doing this can tell u how many of these sims were acceptable
 
 rej$unadj.values #sims selected
 vals = as.data.frame(subset(rej$unadj.values))
-vals1 = vals[,1] #Anc pop size
+vals1 = vals[,1] #RiverCarCapChangeFactor
 vals2 = vals[,2] #MigRate P1
 vals3 = vals[,3] #MigRate P2
 vals4 = vals[,4] #AdmixP1-P2
@@ -77,6 +90,17 @@ rej$ss #their associated summary statistics
 
 rej$dist #their norm-ed euclidean dist to data sum stats
 
+##plotting the uniform histograms v the selected ones ####
+c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
+c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
+
+par(mfrow=c(2,1))
+
+hist(param1, col = c1, main = "Ancestral Size", xlab = " ")
+hist(vals1, col = c2, main = " ", xlab = "Size")
+
+
+
 #plotting (EastABC) params against stat averages ####
 params = subset(abc_sim$param)
   #make the param into df
@@ -84,7 +108,7 @@ params = subset(abc_sim$param)
 param1 = params[,1] #Anc pop size
   #separating out sim-ed params
 
-aver = rowMeans(abc_sim$stats)
+aver = rowMeans(abc_sim3$stats)
 aver1 = rowMeans(rej$ss)
   #average of rows of stats of sims
 
@@ -107,7 +131,7 @@ p1 = ggplot(param1, aes(y=param1, x = aver)) +
   geom_point(shape = 18, size = 3, 
              alpha = 0.5, color = 'darksalmon') +
   xlab('All Simulations') +
-  ylab("Ancestral Population Size") +
+  ylab("Carrying Capacity Change Factor") +
   theme_minimal()
 
 p2 = ggplot(vals1, aes(y=vals1, x = aver1))+
@@ -121,55 +145,144 @@ p2
   #this is a little scatterplot comparison
   #might be useful for the results
 
-p3 = 
-  ggplot(vals1, aes(y=vals1, color = "darkpink"))+
-  geom_boxplot(notch = T, outlier.colour = "black")+
-  ylab("Ancestral Population Size")+
-  ggtitle('Selected Simulations')+
-  theme_minimal()
-p3
+#p3 = 
+#  ggplot(vals1, aes(y=vals1))+
+#  geom_boxplot(notch = T, outlier.colour = "black", color = "salmon")+
+#  ylab("Ancestral Population Size")+
+#  ggtitle('Selected Simulations')+
+#  theme_minimal()
+#p3
   p4 = 
-  ggplot(vals2, aes(y=vals2, color = "lavender"))+
-  geom_boxplot(notch = T, outlier.colour = "black")+
+  ggplot(vals2, aes(y=vals1))+
+  geom_boxplot(notch = T, outlier.colour = "black", color = "purple")+
   ylab("Denisovan Migration Rate")+
 #  ggtitle('Selected Simulations')+
   theme_minimal()
 
 p5 =
-  ggplot(vals3, aes(y=vals3, color = "bisque"))+
-  geom_boxplot(notch = T, outlier.colour = "black")+
+  ggplot(vals3, aes(y=vals2))+
+  geom_boxplot(notch = T, outlier.colour = "black", color = "bisque")+
   ylab("Neanderthal Migration Rate")+
 #  ggtitle('Selected Simulations')+
   theme_minimal()
 p6= 
-  ggplot(vals4, aes(y=vals4, color = "darkgoldenrod"))+
+  ggplot(vals4, aes(y=vals3))+
   geom_boxplot(notch = T, outlier.colour = "black")+
   ylab("Denisovan Admixture")+
 #  ggtitle('Selected Simulations')+
   theme_minimal()
 p7 = 
-  ggplot(vals5, aes(y=vals5, color = "darkgreen"))+
-  geom_boxplot(notch = T, outlier.colour = "black")+
+  ggplot(vals5, aes(y=vals4, color = "darkgreen"))+
+  geom_boxplot(notch = T, outlier.colour = "black", color = "darkgoldenrod")+
   ylab("Neanderthal Admixture")+
 #  ggtitle('Selected Simulations')+
   theme_minimal()
 p8 =
-  ggplot(vals6, aes(y=vals6, color = "aquamarine"))+
-  geom_boxplot(notch = T, outlier.colour = "black")+
+  ggplot(vals6, aes(y=vals5))+
+  geom_boxplot(notch = T, outlier.colour = "black", color = "aquamarine")+
   ylab("Denisovan Population Growth Rate")+
 #  ggtitle('Selected Simulations')+
   theme_minimal()
 p9 = 
-  ggplot(vals7, aes(y=vals7, color = "red"))+
-  geom_boxplot(notch = T, outlier.colour = "black")+
+  ggplot(vals7, aes(y=vals6))+
+  geom_boxplot(notch = T, outlier.colour = "black", color = "red")+
   ylab("Neanderthal Population Growth Rate")+
 #  ggtitle('Selected Simulations')+
   theme_minimal()
 p3+p4+p5+p6+p7+p8+p9
+#boxplot of the selected sims
 
+#histograms of selected simulations ####
+p10 = ggplot(vals1, aes(x=vals1))+
+  geom_histogram(fill = c1, alpha = 0.7)+
+  xlab(" ")+
+  ylab("Frequency")+
+  ggtitle("a: Carrying Capacity Change Factor")+
+  theme_minimal()
 
-        #boxplot of the selected sims
+ggsave("~/Pictures/Visualisations/splatche/350k_selected_distributions005_carcap.png", p10, width = 10, height = 5)
 
+p11 = ggplot(vals2, aes(x=vals2))+
+  geom_histogram(fill = c1, alpha = 0.7, bins = 10)+
+  xlab(" ")+
+  ylab("Frequency")+
+  xlim(0, 0.005)+
+  ggtitle("b: Neanderthal migration rate")+
+  theme_minimal()
+
+p12 =ggplot(vals3, aes(x=vals3))+
+  geom_histogram(fill = c1, alpha = 0.7, bins = 10)+
+  xlab(" ")+
+  ylab("Frequency")+
+  xlim(0, 0.005)+
+  ggtitle("c: Denisovan migration rate")+
+  theme_minimal()
+
+p13 =ggplot(vals4, aes(x=vals4))+
+  geom_histogram(fill = c1, alpha = 0.7, bins = 10)+
+  xlab(" ")+
+  ylab("Frequency")+
+  xlim(0, 0.02)+
+  ggtitle("d: Neanderthal-to-Denisovan admixture rate")+
+  theme_minimal()
+
+p14 =ggplot(vals5, aes(x=vals5))+
+  geom_histogram(fill = c1, alpha = 0.7, bins = 10)+
+  xlab(" ")+
+  ylab("Frequency")+
+  xlim(0, 0.02)+
+  ggtitle("e: Denisovan-to-Neanderthal admixture rate")+
+  theme_minimal()
+
+p15 =ggplot(vals6, aes(x=vals6))+
+  geom_histogram(fill = c1, alpha = 0.7, bins = 10)+
+  xlab(" ")+
+  ylab("Frequency")+
+  xlim(0, 0.54)+
+  ggtitle("f: Neanderthal population growth rate")+
+  theme_minimal()
+
+p16 =ggplot(vals7, aes(x=vals7))+
+  geom_histogram(fill = c1, alpha = 0.7, bins = 10)+
+  xlab(" ")+
+  ylab("Frequency")+
+  xlim(0, 0.54)+
+  ggtitle("g: Denisovan population growth rate")+
+  theme_minimal()
+
+p11 + p12 + p13 + p14 + p15 + p16
+
+ggsave("~/Pictures/Visualisations/splatche/100k_selected_distributions005.png", p10 + p11 + p12 + 
+         p13 + p14 + p15 + p16, width = 15, height = 10)
+
+          #analysing the selected sims ####
+sel = read_csv("~/Documents/appendix_samplelist_hetvintro.csv")
+
+formattable(sel, align = c("l", "l", "l", "l", "l", "l", "l"))
+    #making a little table for the results to include
+
+model = lm(sel$`Ancestral population size` ~ sel$`Neanderthal migration rate` + 
+             sel$`Denisovan migration rate` + 
+             sel$`Neanderthal-Denisovan admixture rate` + 
+             sel$`Denisovan-Neanderthal admixture rate` + 
+             sel$`Neanderthal population growth rate` + 
+             sel$`Denisovan population growth rate`, 
+           data = sel)
+  #multiple linear regression, r = 0.582. not a great model. nonlinear?
+  #only variable that seems signi connected is the anc pop size and mig rate
+  #likely more to do with carcap of deme rather than acc relationship (simmed rel)
+
+model1 = nls(sel$`Ancestral population size` ~ sel$`Neanderthal migration rate`*a + 
+               sel$`Denisovan migration rate`*b + 
+               sel$`Neanderthal-Denisovan admixture rate`*c + 
+               sel$`Denisovan-Neanderthal admixture rate`*d + 
+               sel$`Neanderthal population growth rate`*e + 
+               sel$`Denisovan population growth rate`*f + g, 
+             data = sel, start = c(a=0,b=0,c=0,d=0,e=0,f=0,g=0))
+  #nonlinear square model-still not a great model. variables seem unconnected
+
+corel = rcorr(as.matrix(vals), type = "spearman")
+  #test for correlation
 
 p5 = ggplot(vals1, aes(x=vals1))+
   geom_histogram(aes(y=..density..), color= "black", fill = "aquamarine",
@@ -194,10 +307,10 @@ colnames(df3) = colnames(vals1)
 anc = merge(param1, vals1)
 
 #plotting total sims against accepted ####
-param1 = as.list(param1)
+param2 = as.list(param2)
 vals1 = as.list(vals1)
   #this solution only works when its as a list
-p = do.call(cbind, param1) 
+p = do.call(cbind, param2) 
 p.melt = melt(p) #makes the list into a df for abc_sim
 p.melt = p.melt %>% 
   mutate(Var1 = 1:length(Var1))
